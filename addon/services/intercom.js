@@ -388,7 +388,7 @@ export default Service.extend(Evented, {
 
     assert('You must supply an "ENV.intercom.appId" in your "config/environment.js" file.', appId);
 
-    let obj = { app_id: appId, language_override: languageOverride };
+    let obj = { app_id: appId, language_override: languageOverride, unread_count: unreadCount, is_open: isOpen };
     if (hideDefaultLauncher) {
       obj.hideDefaultLauncher = true;
     }

@@ -5,7 +5,7 @@ import hbs from 'htmlbars-inline-precompile';
 
 let intercomCommandArgs = {};
 
-let intercomStub = function(command, arg) {
+let intercomStub = function (command, arg) {
   if (!intercomCommandArgs[command]) {
     intercomCommandArgs[command] = [];
   }
@@ -22,14 +22,16 @@ const mockConfig = {
       createdAtProp: 'createdAt'
     },
     appId: '1',
-    languageOverride: 'en'
+    languageOverride: 'en',
+    unreadCount: 1,
+    isOpen: true
   }
 };
 
-module('Integration | Component | intercom-io', function(hooks) {
+module('Integration | Component | intercom-io', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', async function(assert) {
+  test('it renders', async function (assert) {
     this.owner.register('service:config', mockConfig, { instantiate: false });
     this.set('intercom', this.owner.lookup('service:intercom'));
     this.set('intercom.api', intercomStub);

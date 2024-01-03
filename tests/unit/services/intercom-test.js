@@ -14,15 +14,16 @@ const mockConfig = {
       createdAtProp: 'createdAt'
     },
     appId: '1',
-    languageOverride: null
+    languageOverride: null,
+    unreadCount: null,
+    isOpen: null
   }
 };
 let intercomStub;
 
-module('Unit | Service | intercom', function(hooks) {
-
+module('Unit | Service | intercom', function (hooks) {
   setupTest(hooks);
-  hooks.beforeEach(function() {
+  hooks.beforeEach(function () {
     this.owner.register('service:config', mockConfig, { instantiate: false });
 
     let service = this.owner.lookup('service:intercom');
@@ -33,14 +34,13 @@ module('Unit | Service | intercom', function(hooks) {
     service.set('config', mockConfig.intercom);
   });
 
-
   // Replace this with your real tests.
-  test('it exists', function(assert) {
+  test('it exists', function (assert) {
     let service = this.owner.lookup('service:intercom');
     assert.ok(service);
   });
 
-  test('it adds the correct user context to the boot config', async function(assert) {
+  test('it adds the correct user context to the boot config', async function (assert) {
     let now = new Date();
     let actualUser = {
       id: 'fooUserId',
@@ -65,6 +65,8 @@ module('Unit | Service | intercom', function(hooks) {
     let expectedBootConfig = {
       app_id: mockConfig.intercom.appId, //eslint-disable-line
       language_override: mockConfig.intercom.languageOverride,
+      unread_count: mockConfig.intercom.unreadCount,
+      is_open: mockConfig.intercom.isOpen,
       name: actualUser.name,
       email: actualUser.email,
       user_hash: actualUser.hash,
@@ -83,22 +85,28 @@ module('Unit | Service | intercom', function(hooks) {
       intercomStub.firstCall.args,
       ['boot', expectedBootConfig],
       'it called the intercom module with boot'
-      );
-      sinon.assert.calledWith(intercomStub, 'boot', expectedBootConfig);
+    );
+    sinon.assert.calledWith(intercomStub, 'boot', expectedBootConfig);
     await settled();
     assert.equal(intercomStub.calledWith('onHide'), true, 'it called the intercom module with onHide');
     assert.equal(intercomStub.calledWith('onShow'), true, 'it called the intercom module with onShow');
-    assert.equal(intercomStub.calledWith('onUnreadCountChange'), true, 'it called the intercom module with onUnreadCountChange');
+    assert.equal(
+      intercomStub.calledWith('onUnreadCountChange'),
+      true,
+      'it called the intercom module with onUnreadCountChange'
+    );
   });
 
-  test('update gets called when user properties change', function(assert) {
+  test('update gets called when user properties change', function (assert) {
     let service = this.owner.lookup('service:intercom');
 
     let expectedConfig = {
       name: 'Bobby Tables',
       email: 'user@example.com',
       app_id: mockConfig.intercom.appId, //eslint-disable-line
-      language_override: mockConfig.intercom.languageOverride
+      language_override: mockConfig.intercom.languageOverride,
+      unread_count: mockConfig.intercom.unreadCount,
+      is_open: mockConfig.intercom.isOpen
     };
 
     service.boot();
@@ -117,7 +125,7 @@ module('Unit | Service | intercom', function(hooks) {
     );
   });
 
-  test('Track events in intercom', function(assert) {
+  test('Track events in intercom', function (assert) {
     let service = this.owner.lookup('service:intercom');
     /* eslint-disable camelcase */
     let eventName = 'invited-friend';
@@ -134,12 +142,12 @@ module('Unit | Service | intercom', function(hooks) {
     sinon.assert.calledWith(intercomStub, 'trackEvent', eventName, metadata);
   });
 
-  test('Calls out to methods in intercom API', function(assert) {
+  test('Calls out to methods in intercom API', function (assert) {
     let service = this.owner.lookup('service:intercom');
     let methods = ['getVisitorId', 'show', 'hide', 'showMessages'];
 
     service.boot();
-    methods.forEach(method => {
+    methods.forEach((method) => {
       service[method]();
       assert.equal(intercomStub.calledWith(method), true, `Intercom method called -- ${method}`);
     });
