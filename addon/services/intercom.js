@@ -28,7 +28,7 @@ const WarnOption = {
 function normalizeIntercomMetadata(data) {
   let result = {};
   let val;
-  Object.keys(data).forEach(key => {
+  Object.keys(data).forEach((key) => {
     val = data[key];
     if (typeOf(val) === 'object') {
       result[underscore(key)] = normalizeIntercomMetadata(val);
@@ -57,23 +57,23 @@ export default Service.extend(Evented, {
    * [description]
    * @return {[type]} [description]
    */
-  _userHashProp: computed('user', 'config.userProperties.userHashProp', function() {
+  _userHashProp: computed('user', 'config.userProperties.userHashProp', function () {
     return get(this, `user.${get(this, 'config.userProperties.userHashProp')}`);
   }),
 
-  _userIdProp: computed('user', 'config.userProperties.userIdProp', function() {
+  _userIdProp: computed('user', 'config.userProperties.userIdProp', function () {
     return get(this, `user.${get(this, 'config.userProperties.userIdProp')}`);
   }),
 
-  _userNameProp: computed('user', 'config.userProperties.nameProp', function() {
+  _userNameProp: computed('user', 'config.userProperties.nameProp', function () {
     return get(this, `user.${get(this, 'config.userProperties.nameProp')}`);
   }),
 
-  _userEmailProp: computed('user', 'config.userProperties.emailProp', function() {
+  _userEmailProp: computed('user', 'config.userProperties.emailProp', function () {
     return get(this, `user.${get(this, 'config.userProperties.emailProp')}`);
   }),
 
-  _userCreatedAtProp: computed('user', 'config.userProperties.createdAtProp', function() {
+  _userCreatedAtProp: computed('user', 'config.userProperties.createdAtProp', function () {
     return get(this, `user.${get(this, 'config.userProperties.createdAtProp')}`);
   }),
 
@@ -93,11 +93,8 @@ export default Service.extend(Evented, {
    * @type {Boolean}
    */
   isBooted: false,
-  _hasUserContext: computed('user', '_userEmailProp', '_userIdProp', function() {
-    return (
-      !!get(this, 'user') &&
-      (!!get(this, '_userEmailProp') || !!get(this, '_userIdProp'))
-    );
+  _hasUserContext: computed('user', '_userEmailProp', '_userIdProp', function () {
+    return !!get(this, 'user') && (!!get(this, '_userEmailProp') || !!get(this, '_userIdProp'));
   }),
   /**
    * Reports the number of unread messages
@@ -304,14 +301,14 @@ export default Service.extend(Evented, {
     }
     this._callIntercomMethod('onHide', () => next(this, '_onHide'));
     this._callIntercomMethod('onShow', () => next(this, '_onShow'));
-    this._callIntercomMethod('onUnreadCountChange', count => {
+    this._callIntercomMethod('onUnreadCountChange', (count) => {
       this._onUnreadCountChange(count);
     });
     this._hasEventHandlers = true;
   },
 
   _wrapIntercomCallInPromise(intercomMethod, eventName, ...args) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       let isOpen = this.get('isOpen');
       if ((eventName === 'show' && isOpen) || (eventName === 'hide' && !isOpen)) {
         next(this, resolve);
@@ -328,12 +325,13 @@ export default Service.extend(Evented, {
   },
 
   // eslint-disable-next-line ember/no-observers
-  userDataDidChange: observer('user.@each', function() {
+  userDataDidChange: observer('user.@each', function () {
     if (this.get('autoUpdate') && this.get('isBooted')) {
       let user = this.get('_computedUser');
       let appId = this.get('appId');
       let languageOverride = this.get('languageOverride');
-      let config = assign({ app_id: appId, language_override: languageOverride }, user);
+      let unreadCount = this.get('unreadCount');
+      let config = assign({ app_id: appId, language_override: languageOverride, unread_count: unreadCount }, user);
       this.update(config);
     }
   }),
@@ -351,7 +349,7 @@ export default Service.extend(Evented, {
     '_userNameProp',
     '_userEmailProp',
     '_userCreatedAtProp',
-    function() {
+    function () {
       assert('You must supply an "ENV.intercom.appId" in your "config/environment.js" file.', this.get('appId'));
 
       let obj = {};
@@ -360,7 +358,7 @@ export default Service.extend(Evented, {
           user = get(this, 'user'),
           userKeys = Object.keys(user);
 
-        userKeys.forEach(k => {
+        userKeys.forEach((k) => {
           if (!userProps.includes(k) && !obj.hasOwnProperty(k)) {
             obj[k] = user[k];
           }
@@ -379,9 +377,10 @@ export default Service.extend(Evented, {
     }
   ),
 
-  _intercomBootConfig: computed('config', 'user.@each', '_hasUserContext', 'hideDefaultLauncher', function() {
+  _intercomBootConfig: computed('config', 'user.@each', '_hasUserContext', 'hideDefaultLauncher', function () {
     let appId = get(this, 'config.appId');
     let languageOverride = get(this, 'config.languageOverride');
+    let unreadCount = get(this, 'unreadCount');
     let user = get(this, '_computedUser');
     let _hasUserContext = get(this, '_hasUserContext');
     let hideDefaultLauncher = get(this, 'hideDefaultLauncher');
