@@ -381,6 +381,7 @@ export default Service.extend(Evented, {
     let appId = get(this, 'config.appId');
     let languageOverride = get(this, 'config.languageOverride');
     let unreadCount = get(this, 'unreadCount');
+    let isOpen = get(this, 'isOpen');
     let user = get(this, '_computedUser');
     let _hasUserContext = get(this, '_hasUserContext');
     let hideDefaultLauncher = get(this, 'hideDefaultLauncher');
